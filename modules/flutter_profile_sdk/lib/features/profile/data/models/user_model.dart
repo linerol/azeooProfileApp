@@ -12,21 +12,23 @@ class UserModel extends UserEntity {
   @JsonKey(name: 'last_name')
   final String lastNameModel;
 
+  @JsonKey(name: 'info')
+  final String infoModel;
+
   @JsonKey(name: 'picture', fromJson: _avatarFromPictureList)
   final String avatarUrlModel;
 
   const UserModel({
-    required int id,
+    required super.id,
     required this.firstNameModel,
     required this.lastNameModel,
     required this.avatarUrlModel,
-    required String info,
+    required this.infoModel,
   }) : super(
-          id: id,
           firstName: firstNameModel,
           lastName: lastNameModel,
           avatarUrl: avatarUrlModel,
-          info: info,
+          info: infoModel,
         );
 
   factory UserModel.fromJson(Map<String, dynamic> json) =>
@@ -35,6 +37,11 @@ class UserModel extends UserEntity {
   Map<String, dynamic> toJson() => _$UserModelToJson(this);
 
   static String _avatarFromPictureList(dynamic pictures) {
+    // Cas 1: Cache local (String directe)
+    if (pictures is String) {
+      return pictures;
+    }
+    // Cas 2: API (Liste d'objets)
     if (pictures is List && pictures.isNotEmpty) {
       final List<Map<String, dynamic>> pics = pictures
           .map<Map<String, dynamic>>((e) => Map<String, dynamic>.from(e as Map))
