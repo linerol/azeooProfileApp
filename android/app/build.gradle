@@ -97,6 +97,10 @@ android {
         debug {
             signingConfig signingConfigs.debug
         }
+        profile {
+            initWith debug
+            matchingFallbacks = ["debug"]
+        }
         release {
             // Caution! In production, you need to generate your own keystore file.
             // see https://reactnative.dev/docs/signed-apk-android.
@@ -110,6 +114,9 @@ android {
 dependencies {
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
+    debugImplementation 'com.azeoo.flutter_profile_sdk:flutter_debug:1.0'
+    profileImplementation 'com.azeoo.flutter_profile_sdk:flutter_profile:1.0'
+    releaseImplementation 'com.azeoo.flutter_profile_sdk:flutter_release:1.0'
 
     if (hermesEnabled.toBoolean()) {
         implementation("com.facebook.react:hermes-android")
@@ -117,3 +124,9 @@ dependencies {
         implementation jscFlavor
     }
 }
+
+project.ext.vectoricons = [
+    iconFontNames: [ 'MaterialIcons.ttf', 'Ionicons.ttf' ] // Name of the font files you want to copy
+]
+
+apply from: "../../node_modules/react-native-vector-icons/fonts.gradle"
