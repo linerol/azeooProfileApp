@@ -70,7 +70,7 @@ cd modules/flutter_profile_sdk
 flutter pub get
 
 # 2. Générer les fichiers de Code (DI, Router, JSON)
-flutter pub run build_runner build --delete-conflicting-outputs
+dart run build_runner build --delete-conflicting-outputs
 
 # 3. Compiler le module AAR
 flutter build aar
