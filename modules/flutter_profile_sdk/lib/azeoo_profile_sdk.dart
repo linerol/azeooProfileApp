@@ -40,6 +40,7 @@ class AzeooProfileSdk {
 
         // On retourne un Router pour bénéficier de AutoRoute
         return MaterialApp.router(
+          debugShowCheckedModeBanner: false,
           routerConfig: _appRouter.config(
             deepLinkBuilder: (deepLink) {
               // Force la navigation vers le profil avec l'ID donné au démarrage

@@ -1,97 +1,106 @@
-This is a new [**React Native**](https://reactnative.dev) project, bootstrapped using [`@react-native-community/cli`](https://github.com/react-native-community/cli).
+# Azeoo Profile App & SDK
 
-# Getting Started
+Ce projet est une démonstration technique comprenant un **SDK Flutter** modulaire intégré dans une application **React Native**.
 
-> **Note**: Make sure you have completed the [Set Up Your Environment](https://reactnative.dev/docs/set-up-your-environment) guide before proceeding.
+## 🎯 Objectifs
 
-## Step 1: Start Metro
+*   Développer un SDK Flutter autonome pour l'affichage de profils utilisateurs.
+*   Intégrer ce SDK dans une application hôte React Native.
+*   Respecter des contraintes d'architecture avancée, de gestion d'état et de performance.
 
-First, you will need to run **Metro**, the JavaScript build tool for React Native.
+---
 
-To start the Metro dev server, run the following command from the root of your React Native project:
+## 🏗️ Architecture & Choix Techniques
 
-```sh
-# Using npm
-npm start
+### 1. SDK Flutter (`modules/flutter_profile_sdk`)
 
-# OR using Yarn
-yarn start
+Le SDK a été conçu pour être **robuste, scalable et testable**.
+
+*   **Clean Architecture :** Le code est divisé en 3 couches distinctes pour séparer les responsabilités :
+    *   **Domain :** Entités et interfaces (Business Logic pure). Aucune dépendance externe.
+    *   **Data :** Implémentation des repositories, sources de données (API, Cache local).
+    *   **Presentation :** UI et gestion d'état (Bloc).
+*   **State Management : `flutter_bloc`**
+    *   Choisi pour sa séparation stricte entre UI et Logique, et sa gestion prédictible des états (`Loading`, `Loaded`, `Error`).
+    *   Permet de gérer facilement le "Pull-to-refresh" et les erreurs.
+*   **Navigation : `auto_route`**
+    *   Solution de navigation déclarative et typée, plus robuste que le `Navigator` de base.
+    *   Permet une gestion fine des Deep Links et des transitions.
+*   **Dependency Injection : `get_it` & `injectable`**
+    *   Assure le découplage entre les classes.
+    *   Facilite le testing et le remplacement des implémentations (ex: Mock vs Real API).
+*   **Réseau & Cache :**
+    *   **API :** `Dio` pour les appels HTTP (Intercepteurs, gestion fine des erreurs).
+    *   **Cache :** `shared_preferences` pour stocker le dernier profil chargé. Permet un affichage hors-ligne (Offline First).
+    *   **Images :** `cached_network_image` pour la mise en cache performante des avatars.
+
+### 2. Application React Native (`/`)
+
+L'application hôte sert de démonstrateur pour l'intégration du SDK.
+
+*   **Architecture :** Utilisation de **Context API** (`UserIdContext`) pour gérer l'état global de l'ID utilisateur entre les écrans.
+*   **Stockage :** `AsyncStorage` pour persister l'ID utilisateur choisi.
+*   **Intégration Native :**
+    *   Le SDK Flutter est intégré sous forme de **module AAR compilé**. C'est une approche "Boîte Noire" professionnelle qui isole le code Flutter du cycle de vie React Native.
+    *   Communication via **Native Modules** (Android) pour lancer l'activité Flutter.
+    *   **Choix d'intégration :** Nous avons opté pour le lancement d'une **Activité Plein Écran** pour le SDK.
+        *   *Pourquoi ?* Cela garantit une isolation totale, des performances optimales (pas de surcharge de rendu hybride) et une expérience utilisateur cohérente pour un module de type "Feature complète".
+
+---
+
+## 🚀 Installation & Lancement
+
+### Pré-requis
+*   Flutter SDK installé et configuré.
+*   Node.js & NPM.
+*   Environnement Android (Android Studio, SDK, Emulator).
+
+### Étape 1 : Préparer le SDK Flutter
+
+Le SDK doit être compilé en `.aar` pour être consommé par l'app Android.
+
+```bash
+cd modules/flutter_profile_sdk
+
+# 1. Installer les dépendances
+flutter pub get
+
+# 2. Générer les fichiers de Code (DI, Router, JSON)
+flutter pub run build_runner build --delete-conflicting-outputs
+
+# 3. Compiler le module AAR
+flutter build aar
 ```
 
-## Step 2: Build and run your app
+### Étape 2 : Lancer l'application React Native
 
-With Metro running, open a new terminal window/pane from the root of your React Native project, and use one of the following commands to build and run your Android or iOS app:
+Une fois le SDK compilé, revenez à la racine.
 
-### Android
+```bash
+cd ../..
 
-```sh
-# Using npm
+# 1. Installer les dépendances JS
+npm install
+
+# 2. Lancer l'application sur Android
 npm run android
-
-# OR using Yarn
-yarn android
 ```
 
-### iOS
+---
 
-For iOS, remember to install CocoaPods dependencies (this only needs to be run on first clone or after updating native deps).
+## ✨ Fonctionnalités Clés
 
-The first time you create a new project, run the Ruby bundler to install CocoaPods itself:
+1.  **Gestion d'erreur & Offline :**
+    *   Si le réseau est coupé, le SDK affiche le dernier profil mis en cache.
+    *   Si aucun cache n'est disponible, un écran d'erreur convivial invite à vérifier la connexion.
+2.  **Pull-to-Refresh :**
+    *   Sur l'écran de profil, tirez vers le bas pour forcer le rechargement des données depuis l'API.
+3.  **Persistance :**
+    *   L'ID utilisateur est sauvegardé côté React Native.
+    *   Le profil complet est mis en cache côté Flutter.
 
-```sh
-bundle install
-```
+---
 
-Then, and every time you update your native dependencies, run:
+## 👤 Auteur
 
-```sh
-bundle exec pod install
-```
-
-For more information, please visit [CocoaPods Getting Started guide](https://guides.cocoapods.org/using/getting-started.html).
-
-```sh
-# Using npm
-npm run ios
-
-# OR using Yarn
-yarn ios
-```
-
-If everything is set up correctly, you should see your new app running in the Android Emulator, iOS Simulator, or your connected device.
-
-This is one way to run your app — you can also build it directly from Android Studio or Xcode.
-
-## Step 3: Modify your app
-
-Now that you have successfully run the app, let's make changes!
-
-Open `App.tsx` in your text editor of choice and make some changes. When you save, your app will automatically update and reflect these changes — this is powered by [Fast Refresh](https://reactnative.dev/docs/fast-refresh).
-
-When you want to forcefully reload, for example to reset the state of your app, you can perform a full reload:
-
-- **Android**: Press the <kbd>R</kbd> key twice or select **"Reload"** from the **Dev Menu**, accessed via <kbd>Ctrl</kbd> + <kbd>M</kbd> (Windows/Linux) or <kbd>Cmd ⌘</kbd> + <kbd>M</kbd> (macOS).
-- **iOS**: Press <kbd>R</kbd> in iOS Simulator.
-
-## Congratulations! :tada:
-
-You've successfully run and modified your React Native App. :partying_face:
-
-### Now what?
-
-- If you want to add this new React Native code to an existing application, check out the [Integration guide](https://reactnative.dev/docs/integration-with-existing-apps).
-- If you're curious to learn more about React Native, check out the [docs](https://reactnative.dev/docs/getting-started).
-
-# Troubleshooting
-
-If you're having issues getting the above steps to work, see the [Troubleshooting](https://reactnative.dev/docs/troubleshooting) page.
-
-# Learn More
-
-To learn more about React Native, take a look at the following resources:
-
-- [React Native Website](https://reactnative.dev) - learn more about React Native.
-- [Getting Started](https://reactnative.dev/docs/environment-setup) - an **overview** of React Native and how setup your environment.
-- [Learn the Basics](https://reactnative.dev/docs/getting-started) - a **guided tour** of the React Native **basics**.
-- [Blog](https://reactnative.dev/blog) - read the latest official React Native **Blog** posts.
-- [`@facebook/react-native`](https://github.com/facebook/react-native) - the Open Source; GitHub **repository** for React Native.
+Projet réalisé dans le cadre du test technique Azeoo.
