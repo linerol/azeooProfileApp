@@ -44,7 +44,11 @@ L'application hôte sert de démonstrateur pour l'intégration du SDK.
     *   Le SDK Flutter est intégré sous forme de **module AAR compilé**. C'est une approche "Boîte Noire" professionnelle qui isole le code Flutter du cycle de vie React Native.
     *   Communication via **Native Modules** (Android) pour lancer l'activité Flutter.
     *   **Choix d'intégration :** Nous avons opté pour le lancement d'une **Activité Plein Écran** pour le SDK.
-        *   *Pourquoi ?* Cela garantit une isolation totale, des performances optimales (pas de surcharge de rendu hybride) et une expérience utilisateur cohérente pour un module de type "Feature complète".
+        *   *Pourquoi pas un Fragment / Vue intégrée ?* Bien que techniquement possible, l'intégration de Flutter via des Fragments dans une navigation native existante est souvent complexe à maintenir et peut introduire des instabilités (gestion de la pile de navigation hybride, conflits de gestes).
+        *   *Avantages de l'Activité :* Cette approche garantit une **isolation totale**, des performances optimales (le moteur Flutter a le contrôle total de la surface de rendu) et une stabilité accrue. C'est le choix privilégié pour intégrer des "features complètes" ou des parcours utilisateurs entiers.
+    *   **Note sur la Navigation :**
+        *   L'énoncé mentionne deux barres de navigation. Dans notre approche, l'application React Native possède sa propre `BottomTabBar`. Lorsqu'on lance le SDK Flutter, on entre dans un contexte "Plein Écran".
+        *   Le SDK gère sa propre navigation interne (si nécessaire) et propose un bouton "Retour" (ou le geste natif Android) pour revenir à l'application hôte, assurant une expérience utilisateur fluide et sans confusion visuelle (pas de double barre de navigation superposée).
 
 ---
 
@@ -102,5 +106,9 @@ npm run android
 ---
 
 ## 👤 Auteur
+
+**Linerol**
+*   [Email](mailto:linerol@icloud.com)
+*   [LinkedIn](https://www.linkedin.com/in/linerol/)
 
 Projet réalisé dans le cadre du test technique Azeoo.
